@@ -161,7 +161,7 @@ services:
     networks:
       - cloak-net
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/stats"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3000/api/stats', timeout=5)"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -203,7 +203,7 @@ services:
     networks:
       - cloak-net
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/stats"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3000/api/stats', timeout=5)"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -245,7 +245,7 @@ services:
     networks:
       - cloak-net
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/stats"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3000/api/stats', timeout=5)"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -275,7 +275,7 @@ services:
     networks:
       - cloak-net
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/stats"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3000/api/stats', timeout=5)"]
       interval: 30s
       timeout: 10s
       retries: 3
