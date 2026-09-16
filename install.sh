@@ -112,7 +112,18 @@ if [ -n "$domain" ]; then
 else
     echo -e "${YELLOW}    ℹ localhost${NC}"
 fi
-echo ""
+
+if [ "$METHOD" == "cloudflare" ]; then
+    echo -e "  ${DIM}Optional: Zero Trust account tag (the string in${NC}"
+    echo -e "  ${DIM}https://one.dash.cloudflare.com/<tag>/networks/tunnels). It is not a secret —${NC}"
+    echo -e "  ${DIM}it only makes Cloak.URL deep-link into your account.${NC}"
+    read -p "    Account tag (Enter to skip): " cf_tag
+    if [ -n "$cf_tag" ]; then
+        export CLOUDFLARE_ACCOUNT_TAG="$cf_tag"
+        echo -e "${GREEN}    ✓ Deep links will use tag $cf_tag${NC}"
+    fi
+    echo ""
+fi
 
 # ── Install Docker ──
 echo -e "${BOLD}🐳  Docker${NC}"
@@ -155,6 +166,9 @@ services:
       - BASE_URL=$BASE_URL
       - DB_PATH=/app/data/urls.db
       - MAX_LINKS=10000
+      - TUNNEL_SERVICE=\${TUNNEL_SERVICE:-http://cloak:3000}
+      - TUNNEL_NAME=\${TUNNEL_NAME:-cloak-url}
+      - CLOUDFLARE_ACCOUNT_TAG=\${CLOUDFLARE_ACCOUNT_TAG:-}
     volumes:
       - $DB_VOLUME:/app/data
     restart: unless-stopped
@@ -197,6 +211,9 @@ services:
       - BASE_URL=$BASE_URL
       - DB_PATH=/app/data/urls.db
       - MAX_LINKS=10000
+      - TUNNEL_SERVICE=\${TUNNEL_SERVICE:-http://cloak:3000}
+      - TUNNEL_NAME=\${TUNNEL_NAME:-cloak-url}
+      - CLOUDFLARE_ACCOUNT_TAG=\${CLOUDFLARE_ACCOUNT_TAG:-}
     volumes:
       - $DB_HOST_PATH:/app/data
     restart: unless-stopped
@@ -239,6 +256,9 @@ services:
       - BASE_URL=$BASE_URL
       - DB_PATH=/app/data/urls.db
       - MAX_LINKS=10000
+      - TUNNEL_SERVICE=\${TUNNEL_SERVICE:-http://cloak:3000}
+      - TUNNEL_NAME=\${TUNNEL_NAME:-cloak-url}
+      - CLOUDFLARE_ACCOUNT_TAG=\${CLOUDFLARE_ACCOUNT_TAG:-}
     volumes:
       - $DB_VOLUME:/app/data
     restart: unless-stopped
@@ -269,6 +289,9 @@ services:
       - BASE_URL=$BASE_URL
       - DB_PATH=/app/data/urls.db
       - MAX_LINKS=10000
+      - TUNNEL_SERVICE=\${TUNNEL_SERVICE:-http://cloak:3000}
+      - TUNNEL_NAME=\${TUNNEL_NAME:-cloak-url}
+      - CLOUDFLARE_ACCOUNT_TAG=\${CLOUDFLARE_ACCOUNT_TAG:-}
     volumes:
       - $DB_HOST_PATH:/app/data
     restart: unless-stopped
@@ -285,6 +308,19 @@ networks:
     driver: bridge
 EOF
     fi
+fi
+
+# Optional overrides for the domain/connect panel. Written to .env so they survive
+# into every later \`docker compose up -d\` (compose loads .env automatically).
+if [ "$METHOD" == "cloudflare" ]; then
+    {
+        echo "# Cloak.URL — read by docker compose. Secrets (TUNNEL_TOKEN) stay in docker-compose.yml."
+        echo "TUNNEL_SERVICE=${TUNNEL_SERVICE:-http://cloak:3000}"
+        echo "TUNNEL_NAME=${TUNNEL_NAME:-cloak-url}"
+        echo "CLOUDFLARE_ACCOUNT_TAG=${CLOUDFLARE_ACCOUNT_TAG:-$cf_tag}"
+    } > .env
+    chmod 600 .env 2>/dev/null || true
+    echo -e "${GREEN}    ✓ .env written (tunnel service + account tag)${NC}"
 fi
 
 # Nginx configs
@@ -407,15 +443,31 @@ printf "  ${BOLD}%-14s${NC} %s\n" "Host DB:" "$DB_HOST_PATH"
 printf "  ${BOLD}%-14s${NC} %s\n" "Container DB:" "/app/data/urls.db"
 echo ""
 
+# Deep links for the Cloudflare dashboard (the tag is not a secret, it just
+# skips the "pick an account" screen).
+if [ -z "$CLOUDFLARE_ACCOUNT_TAG" ] && [ -f .env ]; then
+    CLOUDFLARE_ACCOUNT_TAG="$(grep -s '^CLOUDFLARE_ACCOUNT_TAG=' .env | tail -1 | cut -d= -f2-)"
+fi
+CF_ZT="https://one.dash.cloudflare.com${CLOUDFLARE_ACCOUNT_TAG:+/$CLOUDFLARE_ACCOUNT_TAG}"
+CF_DNS="https://dash.cloudflare.com/?to=/:account/:zone/dns"
+
 if [ "$METHOD" == "cloudflare" ] && [ -n "$TUNNEL_TOKEN" ] && [ -n "$domain" ]; then
-    echo -e "  ${YELLOW}Cloudflare Tunnel Setup:${NC}"
-    echo -e "    Dashboard → Networks → Tunnels → Your Tunnel"
-    echo -e "    Add hostname: ${BOLD}$domain${NC} → ${BOLD}http://cloak:3000${NC}"
+    echo -e "  ${YELLOW}🌐 Connect ${domain} on Cloudflare:${NC}"
+    echo -e "    ${BOLD}1)${NC} Tunnel (Docker connector)   ${CYAN}${CF_ZT}/networks/tunnels${NC}"
+    echo -e "    ${BOLD}2)${NC} Add a hostname route        ${BOLD}$domain${NC} → ${BOLD}http://cloak:3000${NC}"
+    echo -e "    ${BOLD}3)${NC} Check the zone's DNS        ${CYAN}${CF_DNS}${NC}"
+    echo -e "    ${DIM}Or open $BASE_URL → Custom domain: it prints these links for you and${NC}"
+    echo -e "    ${DIM}verifies the tunnel end-to-end (DNS + one HTTPS request to /api/health).${NC}"
     echo ""
 elif [ "$METHOD" == "cloudflare" ] && [ -z "$TUNNEL_TOKEN" ]; then
     echo -e "  ${YELLOW}⚠️  No Cloudflare token set${NC}"
     echo -e "    Your app is running on http://localhost:$PORT only."
-    echo -e "    To add a tunnel later, edit docker-compose.yml and restart."
+    echo -e "    ${BOLD}To make your domain work:${NC} create a tunnel here, paste its token into"
+    echo -e "    docker-compose.yml (tunnel → TUNNEL_TOKEN), then ${BOLD}docker compose up -d${NC}"
+    echo -e "    ${CYAN}${CF_ZT}/networks/tunnels/create${NC}"
+    if [ -n "$domain" ]; then
+        echo -e "    Then route ${BOLD}$domain${NC} → ${BOLD}http://cloak:3000${NC} and verify it at $BASE_URL"
+    fi
     echo ""
 elif [ "$METHOD" == "nginx" ] && [ -n "$domain" ]; then
     echo -e "  ${YELLOW}Next step:${NC}"
