@@ -329,6 +329,20 @@ class TestHttpApi(unittest.TestCase):
         self.assertEqual(self.redirect(other, host="only.example.net")[0], 302)
 
 
+    def test_list_matches_what_the_host_can_serve(self):
+        """Global (NULL-domain) links resolve on any host, so they must also be listed
+        there; links bound to a *different* domain must not leak into that list."""
+        tag = str(abs(hash(self.id())) % 100000)
+        glob = self.post("/api/shorten", {"url": "https://target.test/g" + tag, "custom_code": "g" + tag})[1]
+        bound = self.post("/api/shorten", {"url": "https://target.test/b" + tag, "domain": "other.example.net",
+                                           "custom_code": "b" + tag})[1]
+        status, listing = self.get("/api/urls")
+        codes = {u["code"] for u in listing}
+        self.assertIn(glob["code"], codes)          # listed: it does resolve on this host
+        self.assertNotIn(bound["code"], codes)       # not listed: 404s here
+        self.assertEqual(self.redirect(glob["code"], host="unrelated.test")[0], 302)
+        self.assertEqual(self.redirect(bound["code"], host="unrelated.test")[0], 404)
+
     def test_existing_behavior_unchanged(self):
         status, data = self.post("/api/shorten", {"url": "https://example.org/plain", "path_prefix": "blog"})
         self.assertEqual(status, 200)

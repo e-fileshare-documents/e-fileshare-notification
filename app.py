@@ -808,8 +808,12 @@ class Handler(BaseHTTPRequestHandler):
             conn = sqlite3.connect(DB_PATH)
             c = conn.cursor()
             if host_domain and host_domain != base_domain:
+                # A hostname serves its own links *plus* the global (NULL-domain) bucket —
+                # same priority as the redirect path, so the list never disagrees with what
+                # actually resolves on this host.
                 c.execute("""SELECT code, url, path_prefix, expires_at, created_at, domain, password_hash 
-                    FROM urls WHERE domain = ? ORDER BY created_at DESC LIMIT 50""", (host_domain,))
+                    FROM urls WHERE domain = ? OR domain IS NULL ORDER BY created_at DESC LIMIT 50""",
+                    (host_domain,))
             else:
                 c.execute("""SELECT code, url, path_prefix, expires_at, created_at, domain, password_hash 
                     FROM urls ORDER BY created_at DESC LIMIT 50""")

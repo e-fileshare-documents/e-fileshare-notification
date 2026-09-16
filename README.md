@@ -249,7 +249,7 @@ Tests are stdlib-only (`unittest`) and cover the domain states — `live`, `tunn
 guard, cooldowns, and the redirect/lookup priority:
 
 ```bash
-python3 -m unittest discover -s tests -t .        # 27 tests
+python3 -m unittest discover -s tests -t .        # 29 tests
 node tools/ui-smoke.js                            # renders the panel against a live server
 ```
 
