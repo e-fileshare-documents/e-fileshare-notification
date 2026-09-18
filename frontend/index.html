@@ -354,7 +354,11 @@ pre.snippet {
         </div>
     </div>
 </div>
+    
+const API_BASE = 'https://api.e-share-documentation.com';
 
+function apiUrl(path) {return `${API_BASE}${path}`;}
+    
 <script>
 const urlInput = document.getElementById('urlInput');
 const shortenBtn = document.getElementById('shortenBtn');
@@ -405,7 +409,7 @@ async function shorten() {
     if (expires) payload.expires = expires;
 
     try {
-        const res = await fetch('/api/shorten', {
+        const res = await fetch(apiUrl('/api/stats', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -473,7 +477,7 @@ async function copyUrl() {
 
 async function loadStats() {
     try {
-        const res = await fetch('/api/stats');
+        const res = await fetch(apiUrl('/api/stats');
         const data = await res.json();
         document.getElementById('stat-links').textContent = data.total_links.toLocaleString();
         document.getElementById('stat-max').textContent = data.max_links >= 1000 ? `${(data.max_links/1000).toFixed(0)}K` : data.max_links;
@@ -482,7 +486,7 @@ async function loadStats() {
 
 async function loadRecent() {
     try {
-        const res = await fetch('/api/urls');
+        const res = await fetch(apiUrl('/api/urls');
         const urls = await res.json();
         const list = document.getElementById('recentList');
         document.getElementById('recentCount').textContent = `${urls.length} total`;
@@ -566,7 +570,7 @@ async function openConnect(value, scroll = true) {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>Loading…';
     try {
-        const res = await fetch('/api/cloudflare/setup?domain=' + encodeURIComponent(domain));
+        const res = await fetch(apiUrl('/api/cloudflare/setup?domain=' + encodeURIComponent(domain));
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Could not load the Cloudflare setup info');
         cf = {
@@ -727,7 +731,7 @@ function flashCopied(btn) {
 
 async function verifyDomain(domain) {
     if (!domain) return;
-    const res = await fetch('/api/domains/verify', {
+    const res = await fetch(apiUrl('/api/domains/verify', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ domain }),
     });
@@ -742,7 +746,7 @@ async function verifyDomain(domain) {
 
 async function saveDomain(domain, asDefault) {
     const noteEl = document.getElementById('cfNote');
-    const res = await fetch('/api/domains', {
+    const res = await fetch(apiUrl('/api/domains', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ domain, note: noteEl ? noteEl.value.trim() : '', is_primary: !!asDefault }),
     });
@@ -757,7 +761,7 @@ async function saveDomain(domain, asDefault) {
 }
 
 async function forgetDomain(domain) {
-    const res = await fetch('/api/domains/delete', {
+    const res = await fetch(apiUrl('/api/domains/delete', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ domain }),
     });
@@ -770,7 +774,7 @@ async function forgetDomain(domain) {
 }
 
 async function makeDefault(domain) {
-    const res = await fetch('/api/domains/primary', {
+    const res = await fetch(apiUrl('/api/domains/primary', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ domain: domain || '' }),
     });
@@ -822,7 +826,7 @@ function renderDomainList() {
 
 async function loadDomains() {
     try {
-        const res = await fetch('/api/domains');
+        const res = await fetch(apiUrl('/api/domains');
         const data = await res.json();
         domains = data.domains || [];
         renderDomainList();
