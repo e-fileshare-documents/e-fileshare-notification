@@ -478,7 +478,7 @@ async function copyUrl() {
 
 async function loadStats() {
     try {
-        const res = await fetch(apiUrl('/api/stats');
+        const res = await fetch(apiUrl('/api/stats'));
         const data = await res.json();
         document.getElementById('stat-links').textContent = data.total_links.toLocaleString();
         document.getElementById('stat-max').textContent = data.max_links >= 1000 ? `${(data.max_links/1000).toFixed(0)}K` : data.max_links;
@@ -1360,7 +1360,7 @@ async function loadStats() {
 
 async function loadRecent() {
     try {
-        const res = await fetch(apiUrl('/api/urls');
+        const res = await fetch(apiUrl('/api/urls'));
         const urls = await res.json();
         const list = document.getElementById('recentList');
         document.getElementById('recentCount').textContent = `${urls.length} total`;
