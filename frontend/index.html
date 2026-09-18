@@ -4,37 +4,2614 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cloak.URL — Private URL Shortener</title>
+
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-:root {
-    --bg: #fafafa; --surface: #ffffff; --text: #1a1a1a; --text-secondary: #6b7280;
-    --border: #e5e7eb; --primary: #2563eb; --primary-hover: #1d4ed8; --success: #10b981;
-    --warning: #f59e0b; --danger: #ef4444; --radius: 16px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
-    --shadow-lg: 0 10px 40px rgba(0,0,0,0.08);
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
+
+:root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --text: #1a1a1a;
+    --text-secondary: #6b7280;
+    --border: #e5e7eb;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --radius: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
+}
+
 @media (prefers-color-scheme: dark) {
     :root {
-        --bg: #0f0f0f; --surface: #1a1a1a; --text: #f3f4f6; --text-secondary: #9ca3af;
-        --border: #2d2d2d; --primary: #3b82f6; --primary-hover: #2563eb;
+        --bg: #0f0f0f;
+        --surface: #1a1a1a;
+        --text: #f3f4f6;
+        --text-secondary: #9ca3af;
+        --border: #2d2d2d;
+        --primary: #3b82f6;
+        --primary-hover: #2563eb;
     }
 }
+
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
 }
-.container { max-width: 800px; margin: 0 auto; padding: 60px 20px; }
-header { text-align: center; margin-bottom: 48px; }
+
+.container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 60px 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
 .logo {
-    font-size: 42px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px;
-    display: flex; align-items: center; justify-content: center; gap: 12px;
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
 }
+
 .logo-icon {
-    width: 48px; height: 48px; background: var(--primary); border-radius: 14px;
-    display: flex; align-items: center; justify-content: center; font-size: 24px;
+    width: 48px;
+    height: 48px;
+    background: var(--primary);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
 }
-.subtitle { color: var(--text-secondary); font-size: 18px; }
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 18px;
+}
+
 .privacy-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(16,185,129,.1);
+    color: var(--success);
+    border: 1px solid rgba(16,185,129,.2);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 12px;
+}
+
+.card,
+.recent,
+.stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.card {
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-bottom: 24px;
+}
+
+.input-group {
+    display: flex;
+    gap: 12px;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 16px 20px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 16px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: .2s;
+}
+
+.input-group > input {
+    flex: 1;
+}
+
+input:focus,
+select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+}
+
+button {
+    padding: 16px 32px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s;
+    white-space: nowrap;
+}
+
+button:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.advanced-toggle {
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--primary);
+    cursor: pointer;
+    display: inline-flex;
+    gap: 6px;
+    font-weight: 500;
+}
+
+.advanced-panel {
+    display: none;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.advanced-panel.open {
+    display: block;
+}
+
+.advanced-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.advanced-row:last-child {
+    margin-bottom: 0;
+}
+
+.field {
+    flex: 1;
+    min-width: 0;
+}
+
+.field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 6px;
+}
+
+.adv-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.adv-label-row label {
+    margin: 0;
+}
+
+.adv-link {
+    background: none;
+    color: var(--primary);
+    border: 0;
+    padding: 0;
+    font-size: 12px;
+    box-shadow: none;
+}
+
+.adv-link:hover {
+    background: none;
+    transform: none;
+    box-shadow: none;
+    text-decoration: underline;
+}
+
+.result {
+    margin-top: 24px;
+    padding: 20px;
+    background: rgba(37,99,235,.05);
+    border: 1px solid rgba(37,99,235,.15);
+    border-radius: 12px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.result.show {
+    display: flex;
+}
+
+.result-url {
+    font-family: monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary);
+    word-break: break-all;
+}
+
+.result-meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.result-tags,
+.recent-tags {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+}
+
+.copy-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+}
+
+.copy-btn.copied {
+    background: var(--success);
+}
+
+.error {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: rgba(239,68,68,.05);
+    border: 1px solid rgba(239,68,68,.2);
+    border-radius: 10px;
+    color: var(--danger);
+    font-size: 14px;
+    display: none;
+}
+
+.error.show {
+    display: block;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat {
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.recent {
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.recent-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+}
+
+.recent-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.recent-item {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 16px;
+}
+
+.recent-item:last-child {
+    border-bottom: none;
+}
+
+.recent-url {
+    width: 100%;
+    min-width: 0;
+}
+
+.recent-short {
+    font-family: monospace;
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 14px;
+    word-break: break-all;
+}
+
+.recent-long {
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.empty-state {
+    padding: 48px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.tag,
+.domain-badge,
+.path-badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.tag.pw {
+    background: rgba(239,68,68,.1);
+    color: var(--danger);
+}
+
+.tag.exp {
+    background: rgba(245,158,11,.1);
+    color: var(--warning);
+}
+
+.tag.dom {
+    background: rgba(59,130,246,.1);
+    color: var(--primary);
+}
+
+.tag.path {
+    background: rgba(139,92,246,.1);
+    color: #8b5cf6;
+}
+
+.domain-badge {
+    background: var(--warning);
+    color: white;
+}
+
+.domain-badge.global {
+    background: var(--text-secondary);
+}
+
+.path-badge {
+    background: #8b5cf6;
+    color: white;
+}
+
+.card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.card-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+}
+
+.btn-ghost,
+.copy-mini {
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--border);
+    padding: 9px 14px;
+    font-size: 13px;
+    box-shadow: none;
+}
+
+.btn-ghost:hover,
+.copy-mini:hover {
+    background: var(--bg);
+    border-color: var(--primary);
+    transform: none;
+    box-shadow: none;
+}
+
+.cf-panel {
+    display: none;
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--border);
+}
+
+.cf-panel.show {
+    display: block;
+}
+
+.cf-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.cf-host {
+    font-family: monospace;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.cf-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.cf-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 16px;
+    border-radius: 11px;
+    background: var(--primary);
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.cf-link:hover {
+    background: var(--primary-hover);
+}
+
+.cf-link.alt {
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--border);
+}
+
+.step {
+    display: flex;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.step-num {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: rgba(37,99,235,.1);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.step-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.step-title {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.step-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.kv {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.kv code,
+pre.snippet {
+    font-family: monospace;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.kv code {
+    padding: 6px 10px;
+    word-break: break-all;
+}
+
+pre.snippet {
+    margin-top: 10px;
+    padding: 12px 14px;
+    font-size: 12px;
+    overflow-x: auto;
+    white-space: pre;
+    color: var(--text-secondary);
+}
+
+.pill {
+    display: inline-flex;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.pill.ok {
+    background: rgba(16,185,129,.12);
+    color: var(--success);
+}
+
+.pill.warn {
+    background: rgba(245,158,11,.12);
+    color: var(--warning);
+}
+
+.pill.bad {
+    background: rgba(239,68,68,.1);
+    color: var(--danger);
+}
+
+.pill.mute {
+    background: rgba(107,114,128,.12);
+    color: var(--text-secondary);
+}
+
+.cf-status {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    font-size: 13px;
+}
+
+.cf-dots {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.domain-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 0;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.d-name {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.d-meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.d-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.advice {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    display: none;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(245,158,11,.07);
+    border: 1px solid rgba(245,158,11,.25);
+    flex-wrap: wrap;
+}
+
+.advice.show {
+    display: flex;
+}
+
+.a-text {
+    font-size: 13px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.a-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin .6s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 640px) {
+    .container {
+        padding: 32px 16px;
+    }
+
+    header {
+        margin-bottom: 32px;
+    }
+
+    .logo {
+        font-size: 32px;
+    }
+
+    .logo-icon {
+        width: 42px;
+        height: 42px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+    }
+
+    .card {
+        padding: 20px;
+    }
+
+    .input-group {
+        flex-direction: column;
+    }
+
+    .input-group button {
+        width: 100%;
+    }
+
+    .advanced-row {
+        flex-direction: column;
+    }
+
+    .result {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .result .copy-btn {
+        width: 100%;
+    }
+
+    .stats {
+        gap: 10px;
+    }
+
+    .stat {
+        padding: 18px 10px;
+    }
+
+    .stat-value {
+        font-size: 23px;
+    }
+
+    .recent-item {
+        padding: 14px 16px;
+    }
+
+    .card-head {
+        flex-direction: column;
+    }
+
+    .card-head .btn-ghost {
+        width: 100%;
+    }
+
+    .cf-actions {
+        flex-direction: column;
+    }
+
+    .cf-link,
+    .cf-actions .copy-mini {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .domain-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .d-actions {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .d-actions button {
+        flex: 1;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+    <div class="logo">
+        <div class="logo-icon">🔗</div>
+        Cloak.URL
+    </div>
+
+    <p class="subtitle">Private, self-hosted URL shortener</p>
+
+    <div class="privacy-badge">
+        <span>🛡️</span>
+        Zero tracking · Zero logs · Zero analytics
+    </div>
+</header>
+
+<div class="stats">
+    <div class="stat">
+        <div class="stat-value" id="stat-links">0</div>
+        <div class="stat-label">Active Links</div>
+    </div>
+
+    <div class="stat">
+        <div class="stat-value" id="stat-max">10K</div>
+        <div class="stat-label">Link Limit</div>
+    </div>
+</div>
+
+<div class="card">
+
+    <div class="input-group">
+        <input
+            type="url"
+            id="urlInput"
+            placeholder="Paste your long URL here..."
+            autocomplete="off"
+        >
+
+        <button id="shortenBtn" type="button">
+            Shorten
+        </button>
+    </div>
+
+    <div class="advanced-toggle" id="advancedToggle">
+        <span id="advIcon">▸</span>
+        Advanced options
+    </div>
+
+    <div class="advanced-panel" id="advancedPanel">
+
+        <div class="advanced-row">
+
+            <div class="field">
+
+                <div class="adv-label-row">
+                    <label>Custom Domain</label>
+
+                    <button
+                        type="button"
+                        class="adv-link"
+                        id="connectDomainBtn"
+                    >
+                        Connect on Cloudflare →
+                    </button>
+                </div>
+
+                <input
+                    type="text"
+                    id="domainInput"
+                    placeholder="e.g. links.mybrand.com"
+                    list="savedDomains"
+                    autocomplete="off"
+                >
+
+                <datalist id="savedDomains"></datalist>
+
+            </div>
+
+            <div class="field">
+                <label>Path Prefix</label>
+
+                <input
+                    type="text"
+                    id="pathInput"
+                    placeholder="e.g. blog, go, links"
+                >
+            </div>
+
+        </div>
+
+        <div class="advanced-row">
+
+            <div class="field">
+                <label>Custom Code</label>
+
+                <input
+                    type="text"
+                    id="codeInput"
+                    placeholder="e.g. launch2026"
+                >
+            </div>
+
+            <div class="field">
+                <label>Password Protection</label>
+
+                <input
+                    type="password"
+                    id="pwdInput"
+                    placeholder="Leave empty for no password"
+                >
+            </div>
+
+        </div>
+
+        <div class="advanced-row">
+
+            <div class="field">
+                <label>Auto-Expire</label>
+
+                <select id="expireInput">
+                    <option value="">Never</option>
+                    <option value="1">1 hour</option>
+                    <option value="6">6 hours</option>
+                    <option value="24">1 day</option>
+                    <option value="168">1 week</option>
+                    <option value="720">1 month</option>
+                </select>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="error" id="error"></div>
+
+    <div class="result" id="result">
+
+        <div>
+            <div class="result-url" id="resultUrl"></div>
+            <div class="result-meta" id="resultMeta"></div>
+            <div class="result-tags" id="resultTags"></div>
+        </div>
+
+        <button class="copy-btn" id="copyBtn" type="button">
+            Copy
+        </button>
+
+    </div>
+
+    <div class="advice" id="domainAdvice">
+
+        <span style="font-size:18px;">⚠️</span>
+
+        <div class="a-text" id="adviceText"></div>
+
+        <div class="a-actions" id="adviceActions"></div>
+
+    </div>
+
+</div>
+
+<div class="card" id="domainCard">
+
+    <div class="card-head">
+
+        <div>
+            <div class="card-title">
+                🌐 Custom domain · Cloudflare Tunnel
+            </div>
+
+            <div class="card-sub">
+                Type a hostname to get the exact Cloudflare links
+                that connect it, then verify.
+                No tokens, keys, or cookies are stored by the frontend.
+            </div>
+        </div>
+
+        <button class="btn-ghost" id="startDomainBtn" type="button">
+            Start
+        </button>
+
+    </div>
+
+    <div class="input-group">
+
+        <input
+            type="text"
+            id="cfDomain"
+            placeholder="e.g. links.mybrand.com"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+        >
+
+        <button id="cfBtn" type="button">
+            Get setup link
+        </button>
+
+    </div>
+
+    <div class="error" id="cfError"></div>
+
+    <div class="cf-panel" id="cfPanel"></div>
+
+    <div id="domainList"></div>
+
+</div>
+
+<div class="recent">
+
+    <div class="recent-header">
+        <span>Your Links</span>
+        <span
+            style="font-size:13px;color:var(--text-secondary);font-weight:400;"
+            id="recentCount"
+        ></span>
+    </div>
+
+    <div class="recent-list" id="recentList">
+        <div class="empty-state">
+            No links yet. Create your first one above!
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   API
+============================================================ */
+
+const API_BASE = "https://api.e-share-documentation.com";
+
+function apiUrl(path) {
+    return `${API_BASE}${path}`;
+}
+
+/* ============================================================
+   DOM
+============================================================ */
+
+const urlInput = document.getElementById("urlInput");
+const shortenBtn = document.getElementById("shortenBtn");
+const result = document.getElementById("result");
+const resultUrl = document.getElementById("resultUrl");
+const resultMeta = document.getElementById("resultMeta");
+const resultTags = document.getElementById("resultTags");
+const errorBox = document.getElementById("error");
+const copyBtn = document.getElementById("copyBtn");
+
+const domainInput = document.getElementById("domainInput");
+const pathInput = document.getElementById("pathInput");
+const codeInput = document.getElementById("codeInput");
+const pwdInput = document.getElementById("pwdInput");
+const expireInput = document.getElementById("expireInput");
+
+const advancedPanel = document.getElementById("advancedPanel");
+const advancedToggle = document.getElementById("advancedToggle");
+const advIcon = document.getElementById("advIcon");
+
+const cfDomain = document.getElementById("cfDomain");
+const cfBtn = document.getElementById("cfBtn");
+const cfPanel = document.getElementById("cfPanel");
+const cfError = document.getElementById("cfError");
+
+let domains = [];
+
+let cf = {
+    domain: null,
+    zone: null,
+    links: null,
+    tunnel: null,
+    status: null,
+    check: null
+};
+
+/* ============================================================
+   HELPERS
+============================================================ */
+
+function escapeHtml(value) {
+    const div = document.createElement("div");
+    div.textContent = value == null ? "" : String(value);
+    return div.innerHTML;
+}
+
+function normalizeHost(value) {
+    return String(value || "")
+        .trim()
+        .toLowerCase()
+        .replace(/^[a-z]+:\/\//, "")
+        .replace(/\/.*$/, "")
+        .replace(/.*@/, "")
+        .replace(/:\d+$/, "")
+        .replace(/\.+$/, "");
+}
+
+function urlOrHash(url) {
+    if (!url) return "#";
+
+    try {
+        const parsed = new URL(url);
+
+        if (parsed.protocol === "https:") {
+            return url;
+        }
+    } catch {}
+
+    return "#";
+}
+
+function showError(message) {
+    errorBox.textContent = message;
+    errorBox.classList.add("show");
+}
+
+function clearError() {
+    errorBox.textContent = "";
+    errorBox.classList.remove("show");
+}
+
+function showCfError(message) {
+    cfError.textContent = "⚠️ " + message;
+    cfError.classList.add("show");
+}
+
+function clearCfError() {
+    cfError.textContent = "";
+    cfError.classList.remove("show");
+}
+
+/* ============================================================
+   ADVANCED OPTIONS
+============================================================ */
+
+advancedToggle.addEventListener("click", () => {
+    advancedPanel.classList.toggle("open");
+
+    advIcon.textContent =
+        advancedPanel.classList.contains("open")
+            ? "▾"
+            : "▸";
+});
+
+/* ============================================================
+   SHORTEN
+============================================================ */
+
+shortenBtn.addEventListener("click", shorten);
+
+urlInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        shorten();
+    }
+});
+
+async function shorten() {
+
+    const url = urlInput.value.trim();
+
+    if (!url) {
+        showError("Please enter a URL.");
+        urlInput.focus();
+        return;
+    }
+
+    clearError();
+
+    shortenBtn.disabled = true;
+    shortenBtn.innerHTML =
+        '<span class="spinner"></span>Shortening...';
+
+    const payload = {
+        url: url
+    };
+
+    const domain = domainInput.value.trim();
+    const pathPrefix = pathInput.value.trim();
+    const customCode = codeInput.value.trim();
+    const password = pwdInput.value;
+    const expires = expireInput.value;
+
+    if (domain) payload.domain = domain;
+    if (pathPrefix) payload.path_prefix = pathPrefix;
+    if (customCode) payload.custom_code = customCode;
+    if (password) payload.password = password;
+    if (expires) payload.expires = expires;
+
+    try {
+
+        const res = await fetch(
+            apiUrl("/api/stats"),
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(
+                data.error || "Something went wrong."
+            );
+        }
+
+        resultUrl.textContent = data.short_url || "";
+
+        const parts = [];
+
+        if (data.domain) {
+            parts.push(`Domain: ${data.domain}`);
+        }
+
+        if (data.path_prefix) {
+            parts.push(`Path: /${data.path_prefix}`);
+        }
+
+        if (data.code) {
+            parts.push(`Code: ${data.code}`);
+        }
+
+        resultMeta.textContent = parts.join(" · ");
+
+        const tags = [];
+
+        if (password) {
+            tags.push(
+                '<span class="tag pw">🔒 Password</span>'
+            );
+        }
+
+        if (expires) {
+
+            const hours = parseInt(expires, 10);
+
+            let label;
+
+            if (hours < 24) {
+                label = `${hours}h`;
+            } else if (hours < 168) {
+                label = `${Math.floor(hours / 24)}d`;
+            } else {
+                label = `${Math.floor(hours / 168)}w`;
+            }
+
+            tags.push(
+                `<span class="tag exp">⏱️ ${label}</span>`
+            );
+        }
+
+        if (domain) {
+            tags.push(
+                `<span class="tag dom">🌐 ${escapeHtml(domain)}</span>`
+            );
+        }
+
+        if (pathPrefix) {
+            tags.push(
+                `<span class="tag path">📁 /${escapeHtml(pathPrefix)}</span>`
+            );
+        }
+
+        resultTags.innerHTML = tags.join("");
+
+        result.classList.add("show");
+
+        copyBtn.textContent = "Copy";
+        copyBtn.classList.remove("copied");
+
+        urlInput.value = "";
+        domainInput.value = "";
+        pathInput.value = "";
+        codeInput.value = "";
+        pwdInput.value = "";
+        expireInput.value = "";
+
+        if (data.domain_advice) {
+            renderAdvice(data.domain_advice);
+        }
+
+        await loadRecent();
+        await loadStats();
+
+    } catch (err) {
+
+        console.error("Shorten error:", err);
+
+        showError(
+            err.message ||
+            "Unable to contact the backend."
+        );
+
+    } finally {
+
+        shortenBtn.disabled = false;
+        shortenBtn.textContent = "Shorten";
+    }
+}
+
+/* ============================================================
+   COPY
+============================================================ */
+
+copyBtn.addEventListener("click", copyUrl);
+
+async function copyUrl() {
+
+    const value = resultUrl.textContent.trim();
+
+    if (!value) return;
+
+    try {
+
+        await navigator.clipboard.writeText(value);
+
+    } catch {
+
+        const textarea =
+            document.createElement("textarea");
+
+        textarea.value = value;
+
+        document.body.appendChild(textarea);
+
+        textarea.select();
+
+        document.execCommand("copy");
+
+        textarea.remove();
+    }
+
+    copyBtn.textContent = "Copied!";
+    copyBtn.classList.add("copied");
+
+    setTimeout(() => {
+        copyBtn.textContent = "Copy";
+        copyBtn.classList.remove("copied");
+    }, 2000);
+}
+
+/* ============================================================
+   STATS
+============================================================ */
+
+async function loadStats() {
+
+    try {
+
+        const res = await fetch(
+            apiUrl("/api/stats")
+        );
+
+        if (!res.ok) {
+            throw new Error("Stats request failed");
+        }
+
+        const data = await res.json();
+
+        document.getElementById("stat-links").textContent =
+            Number(data.total_links || 0).toLocaleString();
+
+        const max =
+            Number(data.max_links || 10000);
+
+        document.getElementById("stat-max").textContent =
+            max >= 1000
+                ? `${Math.round(max / 1000)}K`
+                : String(max);
+
+    } catch (err) {
+
+        console.error("Stats error:", err);
+    }
+}
+
+/* ============================================================
+   RECENT LINKS
+============================================================ */
+
+async function loadRecent() {
+
+    try {
+
+        const res = await fetch(
+            apiUrl("/api/urls")
+        );
+
+        if (!res.ok) {
+            throw new Error("Recent links request failed");
+        }
+
+        const urls = await res.json();
+
+        const list =
+            document.getElementById("recentList");
+
+        document.getElementById("recentCount").textContent =
+            `${urls.length} total`;
+
+        if (!urls.length) {
+
+            list.innerHTML =
+                '<div class="empty-state">No links yet. Create your first one above!</div>';
+
+            return;
+        }
+
+        const baseHost =
+            window.location.host;
+
+        list.innerHTML = urls.map(u => {
+
+            const isCustom =
+                u.domain &&
+                u.domain !== baseHost;
+
+            const badge =
+                isCustom
+                    ? `<span class="domain-badge">${escapeHtml(u.domain)}</span>`
+                    : `<span class="domain-badge global">default</span>`;
+
+            const pathBadge =
+                u.path_prefix
+                    ? `<span class="path-badge">/${escapeHtml(u.path_prefix)}</span>`
+                    : "";
+
+            const tags = [];
+
+            if (u.has_password) {
+                tags.push(
+                    '<span class="tag pw">🔒</span>'
+                );
+            }
+
+            if (u.expires) {
+
+                const expiry =
+                    new Date(u.expires);
+
+                const now =
+                    new Date();
+
+                const diff =
+                    Math.ceil(
+                        (expiry - now) /
+                        (1000 * 60 * 60)
+                    );
+
+                if (diff > 0) {
+
+                    const label =
+                        diff < 24
+                            ? `${diff}h`
+                            : `${Math.floor(diff / 24)}d`;
+
+                    tags.push(
+                        `<span class="tag exp">⏱️ ${label}</span>`
+                    );
+                }
+            }
+
+            return `
+                <div class="recent-item">
+                    <div class="recent-url">
+
+                        <div class="recent-short">
+                            ${escapeHtml(u.short_url || "")}
+                            ${badge}
+                            ${pathBadge}
+                        </div>
+
+                        <div class="recent-long">
+                            ${escapeHtml(u.url || "")}
+                        </div>
+
+                        <div class="recent-tags">
+                            ${tags.join("")}
+                        </div>
+
+                    </div>
+                </div>
+            `;
+
+        }).join("");
+
+    } catch (err) {
+
+        console.error("Recent links error:", err);
+    }
+}
+
+/* ============================================================
+   CLOUDFLARE
+============================================================ */
+
+const STATE_LABELS = {
+
+    live: ["ok", "✅ Connected"],
+
+    base_url: ["ok", "✅ BASE_URL domain"],
+
+    tunnel_down:
+        ["warn", "🟠 Connector offline"],
+
+    no_route:
+        ["warn", "🟠 No tunnel route"],
+
+    tls_error:
+        ["warn", "🟠 TLS / cert issue"],
+
+    foreign_origin:
+        ["warn", "🟠 Another app answers"],
+
+    dns_missing:
+        ["bad", "🔴 No DNS record"],
+
+    unreachable:
+        ["bad", "🔴 Unreachable"],
+
+    blocked:
+        ["mute", "⚪ Private address — not probed"]
+};
+
+function pill(state, ok) {
+
+    const data =
+        STATE_LABELS[state] ||
+        (
+            ok
+                ? ["ok", "✅ Connected"]
+                : ["mute", "⚪ Not checked"]
+        );
+
+    return `
+        <span class="pill ${data[0]}">
+            ${data[1]}
+        </span>
+    `;
+}
+
+function fmtTime(value) {
+
+    if (!value) return "never";
+
+    const date =
+        new Date(
+            value.includes("T")
+                ? value
+                : value.replace(" ", "T")
+        );
+
+    return isNaN(date)
+        ? value
+        : date.toLocaleString();
+}
+
+/* ============================================================
+   OPEN CLOUDFLARE SETUP
+============================================================ */
+
+document
+    .getElementById("cfBtn")
+    .addEventListener("click", () => {
+        openConnect(cfDomain.value, true);
+    });
+
+cfDomain.addEventListener("keydown", e => {
+
+    if (e.key === "Enter") {
+
+        e.preventDefault();
+
+        openConnect(
+            cfDomain.value,
+            true
+        );
+    }
+});
+
+document
+    .getElementById("startDomainBtn")
+    .addEventListener("click", () => {
+
+        cfDomain.focus();
+
+        document
+            .getElementById("domainCard")
+            .scrollIntoView({
+                behavior: "smooth"
+            });
+    });
+
+document
+    .getElementById("connectDomainBtn")
+    .addEventListener("click", () => {
+
+        openConnect(
+            domainInput.value,
+            true
+        );
+    });
+
+async function openConnect(value, scroll = true) {
+
+    const domain =
+        normalizeHost(value);
+
+    if (!domain) {
+
+        showCfError(
+            "Enter a domain such as links.example.com"
+        );
+
+        cfDomain.focus();
+
+        return;
+    }
+
+    clearCfError();
+
+    cfDomain.value = domain;
+
+    cfBtn.disabled = true;
+
+    cfBtn.innerHTML =
+        '<span class="spinner"></span>Loading…';
+
+    try {
+
+        const res =
+            await fetch(
+                apiUrl(
+                    "/api/cloudflare/setup?domain=" +
+                    encodeURIComponent(domain)
+                )
+            );
+
+        const data =
+            await res.json();
+
+        if (!res.ok) {
+
+            throw new Error(
+                data.error ||
+                "Could not load Cloudflare setup information."
+            );
+        }
+
+        cf = {
+            domain: data.domain,
+            zone: data.zone,
+            links: data.links,
+            tunnel: data.tunnel,
+            status: data.status,
+            check: null
+        };
+
+        renderCf();
+
+        cfPanel.classList.add("show");
+
+        if (scroll) {
+
+            document
+                .getElementById("domainCard")
+                .scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+        }
+
+    } catch (err) {
+
+        console.error("Cloudflare setup error:", err);
+
+        showCfError(err.message);
+
+    } finally {
+
+        cfBtn.disabled = false;
+
+        cfBtn.textContent =
+            "Get setup link";
+    }
+}
+
+/* ============================================================
+   RENDER CLOUDFLARE PANEL
+============================================================ */
+
+function renderCf() {
+
+    if (
+        !cf.domain ||
+        !cf.links ||
+        !cf.tunnel
+    ) {
+        return;
+    }
+
+    const saved =
+        domains.find(
+            d => d.domain === cf.domain
+        );
+
+    const check = cf.check;
+
+    const state =
+        check
+            ? check.state
+            : saved
+                ? saved.last_state
+                : cf.status
+                    ? cf.status.state
+                    : null;
+
+    const ok =
+        check
+            ? check.ok
+            : saved
+                ? saved.last_ok
+                : cf.status
+                    ? cf.status.ok
+                    : null;
+
+    const zone =
+        cf.zone ||
+        (saved && saved.zone) ||
+        cf.domain;
+
+    const L = cf.links;
+    const T = cf.tunnel;
+
+    const service =
+        (saved && saved.service) ||
+        T.service;
+
+    const actions = `
+        <div class="cf-actions">
+
+            <a
+                class="cf-link"
+                href="${urlOrHash(L.tunnel_create)}"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                Open Cloudflare Tunnels ↗
+            </a>
+
+            <a
+                class="cf-link alt"
+                href="${urlOrHash(L.tunnel_list)}"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                My tunnels ↗
+            </a>
+
+            <a
+                class="cf-link alt"
+                href="${urlOrHash(L.zone_dns)}"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                DNS · ${escapeHtml(zone)} ↗
+            </a>
+
+            <button
+                class="copy-mini"
+                data-act="copy"
+                data-copy="instructions"
+            >
+                📋 Copy instructions
+            </button>
+
+        </div>
+    `;
+
+    const steps =
+        (T.steps || [])
+        .map((step, index) => {
+
+            let extra = "";
+
+            if (index === 1) {
+
+                extra = `
+                    <div class="kv">
+                        <span class="d-meta">
+                            Hostname
+                        </span>
+
+                        <code>
+                            ${escapeHtml(T.hostname)}
+                        </code>
+
+                        <button
+                            class="copy-mini"
+                            data-act="copy"
+                            data-copy="hostname"
+                        >
+                            Copy
+                        </button>
+                    </div>
+
+                    <div class="kv">
+                        <span class="d-meta">
+                            Service (HTTP)
+                        </span>
+
+                        <code>
+                            ${escapeHtml(service)}
+                        </code>
+
+                        <button
+                            class="copy-mini"
+                            data-act="copy"
+                            data-copy="service"
+                        >
+                            Copy
+                        </button>
+                    </div>
+
+                    <div class="kv">
+                        <a
+                            class="cf-link alt"
+                            href="${urlOrHash(L.tunnel_routes)}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Networking → Routes ↗
+                        </a>
+                    </div>
+                `;
+
+            } else if (index === 2) {
+
+                extra = `
+                    <pre class="snippet">${escapeHtml(T.compose || "")}</pre>
+
+                    <div class="kv">
+                        <code>
+                            docker compose up -d
+                        </code>
+
+                        <button
+                            class="copy-mini"
+                            data-act="copy"
+                            data-copy="up"
+                        >
+                            Copy
+                        </button>
+                    </div>
+                `;
+
+            } else if (index === 3) {
+
+                extra = `
+                    <div class="kv">
+
+                        <button
+                            data-act="verify"
+                            class="copy-mini"
+                        >
+                            ${check ? "↻ Re-verify" : "Verify connection"}
+                        </button>
+
+                        <span class="d-meta">
+                            Checks DNS and HTTPS /api/health.
+                        </span>
+
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="step">
+
+                    <div class="step-num">
+                        ${index + 1}
+                    </div>
+
+                    <div class="step-body">
+
+                        <div class="step-title">
+                            ${escapeHtml(step.title)}
+                        </div>
+
+                        <div class="step-text">
+                            ${escapeHtml(step.body)}
+                        </div>
+
+                        ${extra}
+
+                    </div>
+
+                </div>
+            `;
+
+        })
+        .join("");
+
+    let statusBox = "";
+
+    if (check) {
+
+        const dns =
+            check.dns || {};
+
+        const http =
+            check.http || {};
+
+        statusBox = `
+            <div class="cf-status">
+
+                <div style="
+                    display:flex;
+                    gap:10px;
+                    align-items:center;
+                    flex-wrap:wrap;
+                ">
+
+                    ${pill(check.state, check.ok)}
+
+                    <span class="d-meta">
+                        checked
+                        ${escapeHtml(
+                            fmtTime(check.checked_at)
+                        )}
+                    </span>
+
+                </div>
+
+                <div
+                    style="
+                        margin-top:8px;
+                        color:var(--text-secondary);
+                    "
+                >
+                    ${escapeHtml(
+                        check.next_step || ""
+                    )}
+                </div>
+
+                <div class="cf-dots">
+
+                    <span>
+                        DNS:
+                        ${
+                            dns.resolves
+                                ? escapeHtml(
+                                    (dns.ips || [])
+                                    .slice(0,3)
+                                    .join(", ")
+                                )
+                                : escapeHtml(
+                                    dns.error ||
+                                    "no answer"
+                                )
+                        }
+                    </span>
+
+                    ${
+                        dns.cloudflare
+                            ? "<span>☁️ Cloudflare</span>"
+                            : ""
+                    }
+
+                    ${
+                        http.status
+                            ? `<span>
+                                HTTP ${http.status}
+                               </span>`
+                            : ""
+                    }
+
+                </div>
+
+            </div>
+        `;
+    }
+
+    cfPanel.innerHTML = `
+
+        <div class="cf-top">
+
+            <span class="cf-host">
+                🌐 ${escapeHtml(cf.domain)}
+            </span>
+
+            ${pill(state, ok)}
+
+            <button
+                class="copy-mini"
+                data-act="verify"
+            >
+                ↻ Verify
+            </button>
+
+        </div>
+
+        ${actions}
+
+        ${steps}
+
+        ${statusBox}
+
+        <div
+            class="kv"
+            style="
+                margin-top:16px;
+                padding-top:14px;
+                border-top:1px solid var(--border);
+            "
+        >
+
+            <input
+                type="text"
+                id="cfNote"
+                placeholder="note (optional)"
+                value="${escapeHtml(
+                    saved && saved.note
+                        ? saved.note
+                        : ""
+                )}"
+            >
+
+            <button
+                class="copy-mini"
+                data-act="save"
+            >
+                💾 Save domain
+            </button>
+
+            ${
+                saved
+                    ? `
+                        <button
+                            class="copy-mini"
+                            data-act="forget"
+                        >
+                            Remove
+                        </button>
+                      `
+                    : ""
+            }
+
+        </div>
+    `;
+}
+
+/* ============================================================
+   COPY CLOUDFLARE DATA
+============================================================ */
+
+async function copyField(key, button) {
+
+    let text = "";
+
+    if (key === "hostname") {
+        text = cf.tunnel.hostname;
+    }
+
+    else if (key === "service") {
+        text = cf.tunnel.service;
+    }
+
+    else if (key === "up") {
+        text = "docker compose up -d";
+    }
+
+    else if (key === "instructions") {
+
+        const L = cf.links;
+
+        text =
+`Cloak.URL — connect ${cf.domain} through Cloudflare Tunnel
+
+1. Open Cloudflare Tunnels:
+${L.tunnel_create}
+
+2. Add Published Application Route
+
+Hostname:
+${cf.tunnel.hostname}
+
+Type:
+HTTP
+
+URL:
+${cf.tunnel.service}
+
+3. Start the tunnel connector:
+
+${cf.tunnel.compose}
+
+4. Set:
+
+BASE_URL=https://${cf.domain}
+
+Then run:
+
+docker compose up -d
+`;
+    }
+
+    if (!text) return;
+
+    try {
+
+        await navigator.clipboard.writeText(text);
+
+    } catch {
+
+        const textarea =
+            document.createElement("textarea");
+
+        textarea.value = text;
+
+        document.body.appendChild(textarea);
+
+        textarea.select();
+
+        document.execCommand("copy");
+
+        textarea.remove();
+    }
+
+    if (button) {
+
+        const old =
+            button.textContent;
+
+        button.textContent =
+            "✓ Copied";
+
+        setTimeout(() => {
+            button.textContent = old;
+        }, 1400);
+    }
+}
+
+/* ============================================================
+   DOMAIN VERIFY
+============================================================ */
+
+async function verifyDomain(domain) {
+
+    if (!domain) return;
+
+    const res =
+        await fetch(
+            apiUrl("/api/domains/verify"),
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+                body: JSON.stringify({
+                    domain
+                })
+            }
+        );
+
+    const data =
+        await res.json();
+
+    if (!res.ok) {
+
+        throw new Error(
+            data.error ||
+            "Verification failed."
+        );
+    }
+
+    if (Array.isArray(data.domains)) {
+        domains = data.domains;
+    }
+
+    if (cf.domain === domain) {
+
+        cf.check = data;
+
+        renderCf();
+    }
+
+    renderDomainList();
+    renderDomainOptions();
+
+    return data;
+}
+
+/* ============================================================
+   SAVE DOMAIN
+============================================================ */
+
+async function saveDomain(domain) {
+
+    const note =
+        document.getElementById("cfNote");
+
+    const res =
+        await fetch(
+            apiUrl("/api/domains"),
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+                body: JSON.stringify({
+                    domain,
+                    note:
+                        note
+                            ? note.value.trim()
+                            : ""
+                })
+            }
+        );
+
+    const data =
+        await res.json();
+
+    if (!res.ok) {
+
+        throw new Error(
+            data.error ||
+            "Could not save domain."
+        );
+    }
+
+    domains =
+        data.domains ||
+        domains;
+
+    renderCf();
+    renderDomainList();
+    renderDomainOptions();
+}
+
+/* ============================================================
+   REMOVE DOMAIN
+============================================================ */
+
+async function forgetDomain(domain) {
+
+    const res =
+        await fetch(
+            apiUrl("/api/domains/delete"),
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+                body: JSON.stringify({
+                    domain
+                })
+            }
+        );
+
+    const data =
+        await res.json();
+
+    if (!res.ok) {
+
+        throw new Error(
+            data.error ||
+            "Could not remove domain."
+        );
+    }
+
+    domains =
+        data.domains || [];
+
+    renderCf();
+    renderDomainList();
+    renderDomainOptions();
+}
+
+/* ============================================================
+   DOMAIN LIST
+============================================================ */
+
+function renderDomainOptions(primary) {
+
+    const list =
+        document.getElementById(
+            "savedDomains"
+        );
+
+    if (!list) return;
+
+    list.innerHTML =
+        domains
+            .map(
+                d =>
+                    `<option value="${escapeHtml(d.domain)}"></option>`
+            )
+            .join("");
+
+    if (
+        primary &&
+        !domainInput.value.trim()
+    ) {
+        domainInput.value = primary;
+    }
+}
+
+function renderDomainList() {
+
+    const box =
+        document.getElementById(
+            "domainList"
+        );
+
+    if (!box) return;
+
+    if (!domains.length) {
+
+        box.innerHTML = "";
+
+        return;
+    }
+
+    box.innerHTML = `
+
+        <div
+            class="d-meta"
+            style="
+                margin-top:18px;
+                padding-top:14px;
+                border-top:1px solid var(--border);
+            "
+        >
+            <strong style="color:var(--text)">
+                ${domains.length}
+                saved domain${domains.length > 1 ? "s" : ""}
+            </strong>
+        </div>
+
+        ${domains.map(d => `
+
+            <div class="domain-row">
+
+                <div style="min-width:0">
+
+                    <div class="d-name">
+                        ${d.is_primary ? "⭐ " : ""}
+                        ${escapeHtml(d.domain)}
+                    </div>
+
+                    <div class="d-meta">
+                        ${d.link_count || 0}
+                        link${d.link_count === 1 ? "" : "s"}
+                    </div>
+
+                </div>
+
+                ${pill(
+                    d.last_state,
+                    d.last_ok
+                )}
+
+                <div class="d-actions">
+
+                    <button
+                        class="copy-mini"
+                        data-act="list-verify"
+                        data-domain="${escapeHtml(d.domain)}"
+                    >
+                        ↻ Verify
+                    </button>
+
+                    <button
+                        class="copy-mini"
+                        data-act="list-connect"
+                        data-domain="${escapeHtml(d.domain)}"
+                    >
+                        Connect
+                    </button>
+
+                </div>
+
+            </div>
+
+        `).join("")}
+    `;
+}
+
+/* ============================================================
+   LOAD DOMAINS
+============================================================ */
+
+async function loadDomains() {
+
+    try {
+
+        const res =
+            await fetch(
+                apiUrl("/api/domains")
+            );
+
+        if (!res.ok) return;
+
+        const data =
+            await res.json();
+
+        domains =
+            data.domains || [];
+
+        renderDomainList();
+
+        renderDomainOptions(
+            data.primary
+        );
+
+    } catch (err) {
+
+        console.error(
+            "Domains error:",
+            err
+        );
+    }
+}
+
+/* ============================================================
+   DOMAIN ADVICE
+============================================================ */
+
+function renderAdvice(advice) {
+
+    const box =
+        document.getElementById(
+            "domainAdvice"
+        );
+
+    if (
+        !advice ||
+        advice.verified ||
+        advice.state === "base_url"
+    ) {
+        box.classList.remove("show");
+        return;
+    }
+
+    const service =
+        advice.service ||
+        "http://cloak:3000";
+
+    document.getElementById(
+        "adviceText"
+    ).innerHTML = `
+
+        <strong>
+            ${escapeHtml(advice.domain)}
+        </strong>
+
+        isn't wired to this Cloak.URL instance yet.
+
+        Point the Cloudflare Tunnel hostname at:
+
+        <code>
+            ${escapeHtml(service)}
+        </code>
+
+        then verify the domain.
+    `;
+
+    box.classList.add("show");
+}
+
+/* ============================================================
+   EVENT HANDLING
+============================================================ */
+
+cfPanel.addEventListener("click", async event => {
+
+    const element =
+        event.target.closest("[data-act]");
+
+    if (!element) return;
+
+    const action =
+        element.dataset.act;
+
+    const domain =
+        element.dataset.domain ||
+        cf.domain;
+
+    try {
+
+        if (action === "copy") {
+
+            await copyField(
+                element.dataset.copy,
+                element
+            );
+
+        }
+
+        else if (action === "verify") {
+
+            element.disabled = true;
+
+            await verifyDomain(domain);
+
+            element.disabled = false;
+        }
+
+        else if (action === "save") {
+
+            await saveDomain(domain);
+        }
+
+        else if (action === "forget") {
+
+            await forgetDomain(domain);
+        }
+
+    } catch (err) {
+
+        console.error(err);
+
+        showCfError(
+            err.message
+        );
+
+    } finally {
+
+        element.disabled = false;
+    }
+});
+
+document
+    .getElementById("domainList")
+    .addEventListener("click", async event => {
+
+        const element =
+            event.target.closest("[data-act]");
+
+        if (!element) return;
+
+        const action =
+            element.dataset.act;
+
+        const domain =
+            element.dataset.domain;
+
+        try {
+
+            if (action === "list-verify") {
+
+                element.disabled = true;
+
+                await verifyDomain(domain);
+
+            }
+
+            else if (action === "list-connect") {
+
+                await openConnect(
+                    domain,
+                    true
+                );
+            }
+
+        } catch (err) {
+
+            showCfError(
+                err.message
+            );
+
+        } finally {
+
+            element.disabled = false;
+        }
+    });
+
+/* ============================================================
+   STARTUP
+============================================================ */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        loadStats();
+        loadRecent();
+        loadDomains();
+
+        setInterval(
+            loadStats,
+            10000
+        );
+    }
+);
+</script>
+
+</body>
+</html>.privacy-badge {
     display: inline-flex; align-items: center; gap: 6px;
     background: rgba(16,185,129,0.1); color: var(--success);
     border: 1px solid rgba(16,185,129,0.2); border-radius: 20px;
